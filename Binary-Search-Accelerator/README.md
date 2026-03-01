@@ -98,7 +98,17 @@ The waveform shows:
 
 ![Binary Search Waveform](binary_search_waveform.png)
 
+
+### Debugging Notes
+
+During testing, the design initially produced incorrect comparisons because the memory output was sampled in the same cycle the address changed.
+
+I fixed this by adding a WAIT state in the FSM so the system waits one clock cycle for the synchronous memory to return valid data before performing the comparison.
+
+After this change, the search correctly identified both found and not-found values on hardware.
+
 ---
+
 
 ## What I Learned
 
