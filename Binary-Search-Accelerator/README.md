@@ -85,6 +85,21 @@ Hardware:
 
 ---
 
+### Example Simulation Waveform
+
+Below is a ModelSim waveform captured during a successful search.
+
+The waveform shows:
+
+* FSM state transitions
+* memory address changes during binary search
+* synchronous memory latency (data valid one clock after address)
+* correct assertion of the FOUND signal
+
+![Binary Search Waveform](binary_search_waveform.png)
+
+---
+
 ## What I Learned
 
 * synchronous memory timing
