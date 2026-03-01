@@ -2,35 +2,33 @@
 
 This project implements the binary search algorithm entirely in hardware using SystemVerilog on an Intel DE1-SoC FPGA.
 
-Instead of running on a CPU, the search is performed by a finite state machine (FSM) controller connected to synchronous on-chip memory.
+Instead of running on a CPU, the search is performed by a finite state machine (FSM) connected to synchronous on-chip memory.
 
 ---
 
-## Goal
+## Project Overview
 
-Search a sorted memory array for an 8-bit target value and return whether the value exists and its address.
+The system searches a sorted memory array for an 8-bit target value.
+The FPGA reads the value from switches, performs the search in hardware, and displays the result using LEDs and a 7-segment display.
 
-Inputs
+**Inputs**
 
 * target value (switches)
 * start signal
 * reset
 
-Outputs
+**Outputs**
 
-* FOUND indicator
-* NOT FOUND indicator
-* address displayed on 7-segment display
+* FOUND indicator LED
+* NOT FOUND indicator LED
+* memory address (7-segment display)
 
 ---
 
-## Hardware Architecture
+## Architecture
 
-The system consists of two major parts:
+### Control Path (FSM)
 
-### Control Path
-
-Finite State Machine (FSM)
 States:
 
 * IDLE
@@ -44,76 +42,66 @@ States:
 ### Datapath
 
 * address register
-* comparator
 * low/high registers
 * midpoint calculation
+* comparator
 * synchronous memory
 
 ---
 
-## Important Design Challenge
+## Key Engineering Challenge – Synchronous Memory Latency
 
 The on-chip memory is synchronous.
+When an address changes, the data is not valid until the next clock cycle.
 
-This means:
-When an address is applied, the data is NOT immediately available.
+Initially, the system compared data immediately after changing the address, producing incorrect results.
 
-The data becomes valid **one clock cycle later**.
+I fixed this by adding a **WAIT_DATA** state so the FSM pauses one clock cycle before performing the comparison.
 
-Because of this, the FSM must pause for one cycle before comparison.
-This is why the WAIT_DATA state exists.
-
-Without this state, the system compares incorrect data.
-
-This behavior is similar to how CPUs must wait for cache or memory access latency.
+After this change, the hardware search produced correct results for both found and not-found cases.
 
 ---
 
-## Verification
+## Simulation Verification
 
-Simulation:
-
-* ModelSim waveform verification
-* checked state transitions
-* verified correct search sequence
-
-Hardware:
-
-* implemented on FPGA board
-* tested multiple values
-* correct FOUND and NOT FOUND behavior observed
-
----
-
-### Example Simulation Waveform
-
-Below is a ModelSim waveform captured during a successful search.
-
-The waveform shows:
+The ModelSim waveform below shows:
 
 * FSM state transitions
-* memory address changes during binary search
-* synchronous memory latency (data valid one clock after address)
+* address updates during binary search
+* memory latency (data valid one clock after address)
 * correct assertion of the FOUND signal
 
 ![Binary Search Waveform](binary_search_waveform.png)
 
+---
 
-### Debugging Notes
+## Hardware Verification
 
-During testing, the design initially produced incorrect comparisons because the memory output was sampled in the same cycle the address changed.
+The design was implemented on the Intel DE1-SoC FPGA board.
 
-I fixed this by adding a WAIT state in the FSM so the system waits one clock cycle for the synchronous memory to return valid data before performing the comparison.
+I entered target values using the switches.
+The FSM searched the sorted memory and indicated the result using LEDs and the 7-segment display.
 
-After this change, the search correctly identified both found and not-found values on hardware.
+The illuminated LED shows the search result, and the hexadecimal number corresponds to the memory address where the value was found.
+
+![DE1-SoC Hardware Test](binary_search_FPGA.png)
 
 ---
 
+## Debugging Experience
 
-## What I Learned
+During testing I noticed the switch positions did not match expected binary values.
+I determined the board inputs were **active-low**, meaning the FPGA receives the inverted logic level.
 
-* synchronous memory timing
-* FSM control vs datapath separation
-* hardware debugging
-* handling real hardware latency
-* designing sequential algorithms in RTL
+After accounting for input polarity, the hardware behavior matched the simulation.
+
+---
+
+## Skills Demonstrated
+
+* SystemVerilog RTL design
+* Finite State Machine (FSM) architecture
+* synchronous memory interfacing
+* timing debugging
+* ModelSim waveform verification
+* FPGA hardware bring-up
