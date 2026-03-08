@@ -2,79 +2,102 @@
 
 This project implements a hardware graphics system that draws lines directly on a VGA display using an FPGA.
 
-The system generates pixel coordinates in hardware and writes them into a framebuffer, allowing the FPGA to render graphics without a CPU.
+The design generates pixel coordinates in hardware and writes them into a framebuffer, allowing the FPGA to render graphics without using a CPU.
 
 ---
 
 ## Project Overview
 
-The design uses Bresenham’s line drawing algorithm implemented as a finite state machine (FSM).
+The system implements Bresenham’s line drawing algorithm using a finite state machine (FSM).
 
-Each clock cycle:
+During operation:
 
-* a new pixel coordinate is generated
-* the pixel is written into video memory
-* the VGA controller outputs the pixel to the monitor
+1. The screen is cleared.
+2. The line generator produces pixel coordinates.
+3. Each pixel is written into video memory.
+4. The VGA controller continuously outputs pixel data to the monitor.
 
-The display is first cleared and then the line is drawn pixel-by-pixel.
+The line is rendered pixel-by-pixel entirely in hardware.
+
+---
+
+## Hardware Platform
+
+FPGA board: **Intel DE1-SoC (Cyclone V FPGA)**
+Display interface: **VGA output**
 
 ---
 
 ## System Architecture
 
-The hardware system consists of several modules:
+The hardware system contains three main components.
 
-**Line Generator**
+### Line Generator
 
-* Implements Bresenham's algorithm
-* Generates one pixel coordinate per clock cycle
+Implements Bresenham’s line drawing algorithm and produces the next pixel coordinate every clock cycle.
 
-**Framebuffer**
+### Framebuffer
 
-* Stores pixel data for the VGA display
-* Allows pixel-by-pixel updates
+Stores pixel values and allows individual pixel updates from the line generator.
 
-**VGA Controller**
+### VGA Controller
 
-* Generates horizontal and vertical sync signals
-* Streams pixel data to the monitor
+Generates horizontal and vertical synchronization signals and streams pixel data to the VGA monitor.
 
-**Control FSM**
+The modules are coordinated by a control FSM.
 
-States:
+FSM states include:
 
-* CLEAR
-* DRAW
-* HOLD
-
-The FSM first clears the screen, then draws the line, and finally holds the image on the display.
-
----
-
-## Key Concepts Demonstrated
-
-* real-time graphics rendering
-* framebuffer architecture
-* VGA timing generation
-* FSM controlled hardware pipeline
-* FPGA hardware verification
+* CLEAR – clears the framebuffer
+* DRAW – draws the line pixel-by-pixel
+* HOLD – keeps the final image displayed
 
 ---
 
 ## Simulation Verification
 
-The system was verified using ModelSim simulation to confirm:
+The waveform below shows the behavior of the VGA line drawing system in simulation.
 
-* correct pixel coordinate generation
-* valid and done signals from the line generator
-* correct framebuffer write behavior
+Key signals include:
+
+* FSM state transitions
+* pixel coordinate generation (`pixel_x`, `pixel_y`)
+* framebuffer write activity
+
+The waveform confirms that the line generator produces pixel coordinates sequentially while the framebuffer is updated during the drawing process.
+
+![VGA Line Drawer Simulation](vga_line_drawer_waveform.png)
 
 ---
 
 ## Hardware Demonstration
 
-The design was implemented on an Intel DE1-SoC FPGA board connected to a VGA monitor.
+The design was deployed on the **Intel DE1-SoC FPGA board** and connected to a VGA display.
 
-The screen is first cleared and then a line appears at the expected coordinates.
+After the framebuffer is cleared, the hardware line generator begins writing pixel values corresponding to the line coordinates.
+The VGA controller continuously reads from memory and sends the pixel stream to the monitor.
 
-A stable image remains on the screen after drawing is completed.
+Below are two captured outputs from the VGA display showing the rendered line.
+
+### VGA Output Example 1
+
+![VGA Display Result](vgadisplay1.png)
+
+This image shows the line appearing on the VGA display after the drawing process completes.
+
+### VGA Output Example 2
+
+![VGA Display Result](vgadisplay2.png)
+
+A second capture confirming that the line is rendered correctly on the display using the hardware line generator.
+
+---
+
+## Key Concepts Demonstrated
+
+* FPGA-based graphics rendering
+* Bresenham line drawing algorithm in hardware
+* framebuffer memory architecture
+* VGA timing generation
+* FSM-controlled graphics pipeline
+* simulation and hardware verification
