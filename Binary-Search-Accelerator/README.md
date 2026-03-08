@@ -11,6 +11,26 @@ Instead of running on a CPU, the search is performed by a finite state machine (
 The system searches a sorted memory array for an 8-bit target value.
 The FPGA reads the value from switches, performs the search in hardware, and displays the result using LEDs and a 7-segment display.
 
+## System Architecture
+
+```mermaid
+flowchart LR
+    SW[Input Switches<br>Target Value]
+    FSM[FSM Controller]
+    ADDR[Address Register]
+    MEM[Synchronous Memory]
+    COMP[Comparator]
+    LED[LED Result]
+    HEX[7-Segment Display]
+
+    SW --> FSM
+    FSM --> ADDR
+    ADDR --> MEM
+    MEM --> COMP
+    COMP --> FSM
+    FSM --> LED
+    FSM --> HEX
+```
 **Inputs**
 
 * target value (switches)
