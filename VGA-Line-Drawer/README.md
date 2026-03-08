@@ -20,7 +20,21 @@ During operation:
 The line is rendered pixel-by-pixel entirely in hardware.
 
 ---
+## Hardware Architecture
 
+```mermaid
+flowchart LR
+    FSM[Control FSM]
+    LINE[Bresenham Line Generator]
+    FB[Framebuffer Memory]
+    VGA[VGA Controller]
+    MON[Monitor Display]
+
+    FSM --> LINE
+    LINE --> FB
+    FB --> VGA
+    VGA --> MON
+```
 ## Hardware Platform
 
 FPGA board: **Intel DE1-SoC (Cyclone V FPGA)**
